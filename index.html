@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Tic Tac Toe - HTML CSS JS jQuery</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #0f172a;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+    h1 {
+      margin-bottom: 10px;
+    }
+    #status {
+      margin: 10px 0 20px;
+      font-weight: bold;
+      color: cyan;
+    }
+    .board {
+      display: grid;
+      grid-template-columns: repeat(3, 100px);
+      grid-template-rows: repeat(3, 100px);
+      gap: 8px;
+    }
+    .cell {
+      background: #1e293b;
+      border: 2px solid #334155;
+      border-radius: 10px;
+      font-size: 40px;
+      font-weight: bold;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+    .cell.x { color: cyan; }
+    .cell.o { color: violet; }
+    .cell.win { color: lime; background: #065f46; }
+    .controls {
+      margin-top: 20px;
+    }
+    button {
+      padding: 10px 16px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      margin: 0 5px;
+      font-weight: bold;
+    }
+    #newGame { background: #0ea5e9; color: white; }
+    #resetAll { background: #475569; color: white; }
+  </style>
+</head>
+<body>
+  <h1>Tic Tac Toe</h1>
+  <div id="status">Player X’s turn</div>
+
+  <div class="board">
+    <div class="cell" data-idx="0"></div>
+    <div class="cell" data-idx="1"></div>
+    <div class="cell" data-idx="2"></div>
+    <div class="cell" data-idx="3"></div>
+    <div class="cell" data-idx="4"></div>
+    <div class="cell" data-idx="5"></div>
+    <div class="cell" data-idx="6"></div>
+    <div class="cell" data-idx="7"></div>
+    <div class="cell" data-idx="8"></div>
+  </div>
+
+  <div class="controls">
+    <button id="newGame">New Round</button>
+    <button id="resetAll">Reset</button>
+  </div>
+
+  <!-- jQuery -->
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script>
+    $(function(){
+      const $cells = $('.cell');
+      let board = Array(9).fill(null);
+      let current = 'X';
+      let gameActive = true;
+
+      const WIN_LINES = [
+        [0,1,2],[3,4,5],[6,7,8], // rows
+        [0,3,6],[1,4,7],[2,5,8], // cols
+        [0,4,8],[2,4,6]          // diagonals
+      ];
+
+      function updateStatus(msg){
+        $('#status').text(msg);
+      }
+
+      function checkWinner(){
+        for(const [a,b,c] of WIN_LINES){
+          if(board[a] && board[a] === board[b] && board[a] === board[c]){
+            return { winner: board[a], line:[a,b,c] };
+          }
+        }
+        if(board.every(v => v)) return { draw:true };
+        return null;
+      }
+
+      function endGame(result){
+        gameActive = false;
+        if(result.winner){
+          updateStatus(`Player ${result.winner} wins!`);
+          result.line.forEach(i => $cells.eq(i).addClass('win'));
+        } else {
+          updateStatus('Draw!');
+        }
+      }
+
+      $cells.on('click', function(){
+        const idx = $(this).data('idx');
+        if(!gameActive || board[idx]) return;
+
+        board[idx] = current;
+        $(this).text(current).addClass(current.toLowerCase());
+
+        const result = checkWinner();
+        if(result){ endGame(result); return; }
+
+        current = current === 'X' ? 'O' : 'X';
+        updateStatus(`Player ${current}’s turn`);
+      });
+
+      $('#newGame').on('click', function(){
+        board.fill(null);
+        current = 'X';
+        gameActive = true;
+        $cells.text('').removeClass('x o win');
+        updateStatus('Player X’s turn');
+      });
+
+      $('#resetAll').on('click', function(){
+        location.reload();
+      });
+    });
+  </script>
+</body>
+</html>
